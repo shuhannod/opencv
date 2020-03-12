@@ -5,7 +5,6 @@
 #include "precomp.hpp"
 #include "persistence.hpp"
 #include <unordered_map>
-#include <iterator>
 
 namespace cv
 {
@@ -2066,20 +2065,20 @@ FileNode FileNode::operator[](const char* nodename) const
     return this->operator[](std::string(nodename));
 }
 
-FileNode FileNode::operator[](int i) const
-{
-    if(!fs)
-        return FileNode();
-
-    CV_Assert( isSeq() );
-
-    int sz = (int)size();
-    CV_Assert( 0 <= i && i < sz );
-
-    FileNodeIterator it = begin();
-    it += i;
-
-    return *it;
+FileNode FileNode::operator[](int i){
+  if (!fs) return FileNode();
+  CV_Assert(isSeq());
+  int sz = (int)size();
+  CV_Assert(0 <= i && i < sz);
+  int tmp = i - last_id;
+  if (tmp > 0) {
+    last_node += tmp;
+  } else if (tmp == 0) {
+    last_node = begin();
+  }
+  last_id = i;
+  FileNodeIterator it = last_node;
+  return *it;
 }
 
 std::vector<String> FileNode::keys() const
